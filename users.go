@@ -56,7 +56,7 @@ func genUserStartPostHandler(db *gorm.DB) gin.HandlerFunc {
 
 		db.Create(u)
 		c.HTML(http.StatusOK, "location.html", gin.H{
-			"NextURL": "/login",
+			"NextURL": "/dashboard/login",
 		})
 	}
 }
