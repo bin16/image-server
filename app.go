@@ -90,7 +90,7 @@ func main() {
 	for key, value := range handlerOptions {
 		r.GET("/s/:id/"+key, convertHander(db, value))
 	}
-	apiRoot := "/dashboard/"
+	apiRoot := "/dashboard"
 	dashboard := r.Group(apiRoot, func(c *gin.Context) {
 		sess := sessions.Default(c)
 		info := sess.Get("info")
