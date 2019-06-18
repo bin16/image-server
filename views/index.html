@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Files Upload</title>
+    <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css" integrity="sha384-nn4HPE8lTHyVtfCBi5yW9d20FjT8BJwUXyWZT9InLYax14RDjBj46LmSztkmNP9w" crossorigin="anonymous">
+    <style>
+    .pad {
+        padding: 2em;
+    }
+
+    #uploads {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .image-preview {
+        box-sizing: border-box;
+        max-width: calc(128px + 1em);
+        margin: 1rem;
+        padding: .5em;
+        border: 1px solid #dddddd;
+        background: #f9f9f9;
+    }
+
+    .image-preview img {
+        display: block;
+        max-width: 100%;
+        object-fit: scale-down;
+    }
+
+    .image-preview figcaption {
+        color: #aaaaaa;
+    }
+
+    .image-preview figcaption::before {
+        content: '';
+        display: block;
+        height: 1px;
+        margin: .5em auto;
+        background: #dddddd;
+    }
+
+    #upload {
+        display: flex;
+        height: 256px;
+        margin: 1rem;
+        padding: 1em;
+        color: #dddddd;
+        font-size: 24px;
+        border: 1px solid #dddddd;
+        background: #f9f9f9;
+        transition: .2s background-color;
+    }
+
+    #upload::before {
+        margin: auto;
+    }
+
+    #upload.upload-dragover {
+        border-color: goldenrod;
+        color: goldenrod;
+        background: wheat;
+    }
+    
+    #upload.upload-dragover::before {
+        content: 'Drop files to upload.';
+    }
+
+    #upload.upload-uploading {
+        border-color: lightseagreen;
+        color: lightseagreen;
+        background-color: beige;
+    }
+
+    #upload.upload-uploading::before {
+        content: 'Uploading... ⬆️';
+    }
+
+    .btn-icon {
+        display: inline-block;
+        padding: 2px 5px;
+        border-radius: 1em;
+        border: none;
+        background: none;
+        transition: .1s background-color;
+        text-decoration: none;
+    }
+
+    .btn-icon:hover {
+        background: #dddddd;
+    }
+    </style>
+</head>
+<body>
+    <div class="pure-g">
+        <div class="pure-u-1-3">
+            <div class="pad">
+                <div id="upload">
+
+                </div>
+            </div>
+        </div>
+        <div class="pure-u-2-3">
+            <div class="pad">
+                <div id="uploads"></div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/6.5.2/rxjs.umd.min.js"></script>
+    <script>
+    const root = '{{ .Root }}'
+    const preview = upload => `
+        <figure class="image-preview">
+            <img width="128" height="128" src="${ upload.url + (upload.mime_type.startsWith('video/') ? '/screenshot' : '/thumbnail')}" />
+            <div class="actions">
+                <button class="btn-icon js-delete" data-id="${ upload.id }">🗑️</button>
+                <a class="btn-icon" href="${ upload.url }" target="_blank" >🔗</a>
+            </div>
+        </figure>`
+    rxjs.ajax.ajax(`${ root }/uploads`).pipe(
+        rxjs.operators.map(a => a.response),
+        rxjs.operators.catchError(console.warn),
+    ).subscribe(items => {
+        document.querySelector('#uploads').innerHTML = items.map(preview).join('\n');
+    })
+
+    rxjs.fromEvent(document.querySelector('#upload'), 'dragover').subscribe(e => e.preventDefault())
+    rxjs.fromEvent(document.querySelector('#upload'), 'dragenter').subscribe(ev => {
+        ev.preventDefault()
+        document.querySelector('#upload').classList.add('upload-dragover')
+    })
+    rxjs.fromEvent(document.querySelector('#upload'), 'dragleave').subscribe(ev => {
+        ev.preventDefault()
+        document.querySelector('#upload').classList.remove('upload-dragover')
+    })
+    rxjs.fromEvent(document.querySelector('#upload'), 'drop').subscribe(ev => {
+        ev.preventDefault()
+        document.querySelector('#upload').classList.remove('upload-dragover')
+        document.querySelector('#upload').classList.add('upload-uploading')
+        const { files } = ev.dataTransfer
+        const form = new FormData()
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i]
+            form.append("images", file, file.name)
+        }
+        rxjs.ajax.ajax.post(`${ root }/uploads`, form).subscribe(rsp => {
+            const items = rsp.response
+            document.querySelector('#uploads').innerHTML = items.map(preview).join('\n') + document.querySelector('#uploads').innerHTML
+        })
+    })
+    rxjs.fromEvent(document.querySelector('#uploads'), 'click').subscribe(ev => {
+        const classList = [].slice.apply(ev.target.classList)
+        if (classList.indexOf('js-delete') >= 0) {
+            const id = ev.target.dataset['id']
+            rxjs.ajax.ajax.delete(`${ root }/uploads/${ id }`).subscribe(rsp => {
+                ev.target.parentElement.parentElement.remove()
+            })
+        }
+    })
+    </script>
+</body>
+</html>

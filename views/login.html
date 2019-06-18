@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Files Upload</title>
+    <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css" integrity="sha384-nn4HPE8lTHyVtfCBi5yW9d20FjT8BJwUXyWZT9InLYax14RDjBj46LmSztkmNP9w" crossorigin="anonymous">
+    <style>
+        body {
+            height: 100vh;
+            background: #eeeeee;
+        }
+        .g {
+            display: flex;
+            height: 75vh;
+        }
+        .form-container {
+            box-sizing: border-box;
+            width: 100%;
+            max-width: 480px;
+            margin: auto;
+            padding: 2em;
+            border: 1px solid #dddddd;
+            background: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="g">
+        <div class="form-container">
+            <form class="pure-form pure-form-stacked" action="login" method="POST" enctype="multipart/form-data">
+                <fieldset>
+                    <legend>
+                        <h2>Login 🚀</h2>
+                    </legend>
+    
+                    <label for="email">Email</label>
+                    <input class="pure-input-1" name="email" id="email" type="email" placeholder="Email" autocomplete="email" required>
+            
+                    <label for="password">Password</label>
+                    <input class="pure-input-1" name="password" id="password" type="password" placeholder="Password" autocomplete="new-password" required>
+            
+                    <br>
+    
+                    <button type="submit" class="pure-button pure-button-primary">LOGIN</button>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
